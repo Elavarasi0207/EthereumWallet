@@ -12,6 +12,10 @@ from django.http import HttpResponseRedirect
 import secrets
 from sha3 import keccak_256
 from coincurve import PublicKey
+import uuid
+from django.db import models
+from requests.exceptions import HTTPError
+from requests_toolbelt.utils import dump
 
 # Create your views here.
 def index(request):
@@ -34,6 +38,7 @@ def index(request):
         #live_bitcoin_price1 = live_price[0].getText()
         #live_bitcoin_price1 = list(live_price[0]).find("span").text
         res = requests.get('https://www.blockchain.com/eth/address/'+addr)
+        
         if res:
             soup = bs4.BeautifulSoup(res.text, 'lxml')
             # bal = soup.find_all('span', {'class': 'sc-1ryi78w-0 bFGdFC sc-16b9dsl-1 iIOvXh u3ufsr-0 gXDEBk'})
@@ -51,6 +56,9 @@ def index(request):
             total_received1_int = str(total_received1)
             #total_sent1_int = float(total_sent1)
             total_sent1_int = str(total_sent1)
+            
+            #key_ref_id = uuid.uuid1()
+            #key_ref_id = key_ref_id.hex
             #live_bitcoin_price1_int = float(live_bitcoin_price1)
             
             ##balance_usd = final_bal1_int*live_bitcoin_price1_int
@@ -62,7 +70,6 @@ def index(request):
             ##total_sent_usd = total_sent1_int*2
         else:
             return redirect('/')
-
         detail = Details()
         detail.balance = final_bal
         detail.balance1 = final_bal1
@@ -71,6 +78,36 @@ def index(request):
         detail.total_received1 = total_received1
         detail.total_sent = total_sent
         detail.total_sent1 = total_sent1
+        
+        asset_by_custID = 'http://localhost:8080/digitalAsset/assetByCustId/'+ addr
+        headers = {'Content-type':'application/json', 'Accept':'application/json'}
+        #data1 = {"customerId": 1, "assetSerialNo": 1}
+        asset_by_custID_response = requests.post(asset_by_custID,  headers=headers)
+        asset_by_custID_response.raise_for_status()
+        #data = {"customerId": 1, "assetSerialNo": 2,m": "Ether", "assetQuantity": 1, "publicKey": address, "privateKey": private_key, "guid" : key_ref_id})
+        asset_retrieve_json = asset_by_custID_response.json()
+        private_key_retrieved = asset_retrieve_json["privateKey"]
+        detail.private_key_retrieved = private_key_retrieved
+        #try:
+        #    asset_by_custID = 'http://localhost:8080/digitalAsset/assetByCustId'
+        #    #response = requests.post(digi_locker,
+        #    #data = {'key1':'value1'})
+        #    asset_by_custID_response = requests.post(asset_by_custID,
+        #    data = {"customerId": 1, "assetSerialNo": 2 })
+        #    asset_by_custID_response.raise_for_status()
+        #    #data = {"customerId": 1, "assetSerialNo": 2,m": "Ether", "assetQuantity": 1, "publicKey": address, "privateKey": private_key, "guid" : key_ref_id})
+        #    asset_retrieve_json = asset_by_custID_response.json()
+        #    private_key_retrieved = asset_retrieve_json["privateKey"]
+        #    #privatekey_save = Details( private_key=private_key_retrieved)
+            #privatekey_save.save()
+        #except HTTPError as http_err:
+        #    print(f'HTTP error occurred: {http_err}')
+        #except Exception as err:
+        #    print(f'Other error occurred: {err}')
+        
+        
+
+        
         #detail.live_bitcoin_price = live_bitcoin_price
         ##detail.live_bitcoin_price = 2
         #detail.live_bitcoin_price1 = live_bitcoin_price1
@@ -78,7 +115,6 @@ def index(request):
         ##detail.balance_usd = int(balance_usd)
         ##detail.total_received_usd = int(total_received_usd)
         ##detail.total_sent_usd = int(total_sent_usd)
-
 
     else:
         detail = '   '
@@ -132,6 +168,10 @@ def register(request):
     detail.private_key = private_key.hex()
     detail.public_key = public_key
     detail.address = address
+    global key_ref_id
+    key_ref_id = uuid.uuid1()
+    key_ref_id = key_ref_id.hex
+    detail.key_ref_id = key_ref_id
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -151,6 +191,30 @@ def register(request):
             else:
                 user = User.objects.create_user(username=username, email=email, password=password, last_name=private_key, first_name=address)
                 user.save();
+                #digi_locker = 'https://pythonexamples.org/'
+                digi_locker1 = "http://localhost:8080/digitalAsset/addAsset"
+                #response = requests.post(digi_locker,
+                #data = {'key1':'value1'})
+                #headers = {'Content-type':'application/json', 'Accept':'application/json'}
+                private_key_25 = private_key[:25]
+                public_key_25 = address[:25]
+                head = {'accept': 'application/json', 'Content-Type': 'application/json'}
+                #data2 = { 'customerId': 7, 'assetSerialNo': 8, 'assetType': 'crypto', 'assetSource': 'Ether', 'assetEcosystem': 'Ether', 'assetQuantity': 1, 'publicKey': '0x71C7656EC7ab', 'privateKey': '0x71C7656EC7'}
+                #data2 = { 'customerId': 1, 'assetSerialNo': 1, 'assetType': 'crypto', 'assetSource': 'Ether', 'assetEcosystem': 'Ether', 'assetQuantity': 1, 'publicKey': address , 'privateKey': private_key}
+                data2 = { 'username': username , 'email': email , 'keyRefId': key_ref_id ,  'publicKey': address , 'privateKey': private_key , 'assetType': 'Ether'}
+                response1 = requests.post(digi_locker1, json=data2, headers=head, verify=False)
+                response1.raise_for_status()
+                #response1.raise_for_status()
+                #data = {"customerId": 1, "assetSerialNo": 2, "assetType" :"crypto", "assetSource": "Ether", "assetEcosystem": "Ether", "assetQuantity": 1, "publicKey": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F", "privateKey": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F", "guid" :"testguid1"})
+            
+                #data = {"customerId": 1, "assetSerialNo": 2, "assetType" :"crypto", "assetSource": "Ether", "assetEcosystem": "Ether", "assetQuantity": 1, "publicKey": address, "privateKey": private_key, "guid" : key_ref_id})
+                #status_json = dump.dump_all(response1)
+            
+                #status1 = status_json.decode()
+                status1 = response1.text
+
+                keyid_save = Details(key_ref_id=key_ref_id, username=username, email=email, public_key=address, status=status1)
+                keyid_save.save()
                 print('User Created')
                 return redirect('login')
 
@@ -161,6 +225,27 @@ def register(request):
 
     else:
         return render(request, 'register.htm', {'detail': detail})
+
+    
+
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
+#def retrive(request, id):
+#    try:
+#            asset_by_custID = 'http://localhost:8080/digitalAsset/assetByCustId'
+#            #response = requests.post(digi_locker,
+#            #data = {'key1':'value1'})
+#            asset_by_custID_response = requests.post(asset_by_custID,
+#            data = {"customerId": 1, "assetSerialNo": 2 })
+#            asset_by_custID_response.raise_for_status()
+#            #data = {"customerId": 1, "assetSerialNo": 2,m": "Ether", "assetQuantity": 1, "publicKey": address, "privateKey": private_key, "guid" : key_ref_id})
+#            asset_retrieve_json = asset_by_custID_response.json()
+#            private_key_retrieved = asset_retrieve_json["privateKey"]
+#            #privatekey_save = Details( private_key=private_key_retrieved)
+#           #privatekey_save.save()
+#    except HTTPError as http_err:
+#            print(f'HTTP error occurred: {http_err}')
+#    except Exception as err:
+#            print(f'Other error occurred: {err}')

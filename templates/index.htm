@@ -120,12 +120,13 @@
 
             <a href="#"><button class="button button1" onclick="sendFunction()">Send Ether</button></a>
             <a href="#"><button class="button button1" onclick="receiveFunction()">Receive Ether</button></a>
-            <a href="#"><button class="button button1" onclick="saveFunction()">Save Ether in BoFA Locker</button></a>
+            <!--<a href="#"><button class="button button1" onclick="saveFunction()">Save Ether in BoFA Locker</button></a>-->
 
             </div><br>
       <!--</section>-->    
 
       <div align="center" id="sendether">
+        
         <!--<h1><b>Send Ether</b></h1><br>-->
         <h1>This Feature is Coming Soon</h1>
         <p style="max-width: 400px; min-width: 100px;">
@@ -140,9 +141,12 @@
         </button><br>
         <div id="pk" >
           <h3><b>Your Private Key Is:</b></h3>
-          <b>{{user.last_name}}</b>
+          <b>{{ detail.private_key_retrieved }}</b>
         </div>
-        
+        <!--<div>
+          <input id="search" name="search" type="text" class="query-search" placeholder="Search...">
+          <input onclick="getpk()" type="button" class="btn btn-primary" value = "View Details"/>
+        </div>-->
       </div>
 
       <div align="center" id="receiveether">
@@ -194,8 +198,8 @@
           
           <div class="tooltip">
           <button onclick="myFunction()" onmouseout="outFunc()" style="border-radius: 20px;">
-            <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
-            Copy Address
+              <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
+              Copy Address
           </button>
 
           
@@ -283,6 +287,8 @@
         function getpk(){
           pk.style.display = "block";
         }
+
+
         function saveFunction() {
           var x = document.getElementById("receiveether");
           var y = document.getElementById("details");
@@ -327,6 +333,16 @@
              background-color: #fff;
             }
             table#t01 th {
+              background-color: #FF8C00;
+              color: white;
+            }
+            table#t02 tr:nth-child(even) {
+              background-color: #eee;
+            }
+            table#t02 tr:nth-child(odd) {
+             background-color: #fff;
+            }
+            table#t02 th {
               background-color: #FF8C00;
               color: white;
             }
@@ -398,6 +414,60 @@
             <!--<td><b>{{detail.balance_usd}} USD</b></td>-->
           </tr>
         </table>
+
+        <!--<br>
+        <h3 align="center"> Click Submit to retrieve Privatekey of <b>{{user.first_name}}</b></h3>
+        <h3 align="center">Final Balance:       {{info1.balance}}</h3>
+        
+        <form action="/" method="POST">
+          {% csrf_token %}
+  
+          <style>
+              .button {
+                border-radius: 25px;
+                background-color: #4CAF50; /* Green */
+                border: none;
+                color: white;
+                padding: 16px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+              }
+              
+              .button1 {
+                border-radius: 25px;
+                background-color: #FF8C00; 
+                color: black; 
+                border: 2px solid #FF8C00;
+              }
+              
+              .button1:hover {
+                background-color: white;
+                color: #FF8C00;
+              }
+          </style>
+  
+          <input type="hidden" name="addr" value="{{user.first_name}}"><br>
+          <h6 align="center"><input type="submit" value="Submit" class="button button1"></h6>
+        </form>
+  
+        <table id="t02">
+            <tr>
+              <th> </th>
+              <th>PrivateKey</th> 
+              <th>USD</th>
+            </tr>
+            <tr>
+              <td>Privatekey</td>
+              <td><b>{{detail.private_key_retrieved}}</b></td>
+              <td><b>   </b></td>
+            </tr>
+          </table>-->
+    
       </section>
 
       
