@@ -34,6 +34,7 @@ def index(request):
         #
         #live_bitcoin_price = live_price[0].getText()
         #live_bitcoin_price = list(live_price[0]).find("span").text
+        #tes account
         #
         #live_bitcoin_price1 = live_price[0].getText()
         #live_bitcoin_price1 = list(live_price[0]).find("span").text
